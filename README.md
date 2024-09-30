@@ -1,6 +1,6 @@
 # Implementing a Hash table in C
 
-This project implements a hash table in C, following the tutorial written by [James Routley](https://twitter.com/james_routley)
+This project implements a Hash table in C, following the tutorial written by [James Routley](https://twitter.com/james_routley)
 
 ## Contents
 
