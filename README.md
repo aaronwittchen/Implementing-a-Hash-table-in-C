@@ -29,3 +29,7 @@ gcc -o hash_table_program main.c hash_table.c prime.c -lm
 ## Appendix
 
 This implementation is not simply copy-and-paste. Several issues have been addressed, including potential overflow in the ht_hash() function, improved memory management in ht_delete(), elimination of duplicate entries in ht_insert(), and enhanced resizing functions.
+
+## Todo
+
+User inputs; maybe comments?
