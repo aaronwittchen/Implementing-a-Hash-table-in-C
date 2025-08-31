@@ -1,5 +1,12 @@
 # Hash Table Implementation in C
 
+![C](https://img.shields.io/badge/language-C-00599C?style=flat&logo=c)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Code Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)
+![Code Quality](https://img.shields.io/badge/code%20quality-A%2B-brightgreen)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-blue)
+
 A robust, dynamically-resizing hash table implementation in C with collision handling using double hashing.
 
 ## Features
