@@ -6,10 +6,23 @@
 int main() {
     // Create a new hash table
     ht_hash_table* ht = ht_new();
+    if (ht == NULL) {
+        printf("Failed to create hash table\n");
+        return 1;
+    }
 
-    printf("1. Create a new hash table\n");
-    printf("2. Let's add Name, Age, Occupation, and Country with the following values:\n");
-    printf("   John, 30, Software Engineer, USA\n\n");
+    printf("=== Hash Table Implementation Demo ===\n\n");
+    
+    printf("1. Initial state:\n");
+    printf("   Size: %d items\n", ht_size(ht));
+    printf("   Empty: %s\n", ht_is_empty(ht) ? "Yes" : "No");
+    printf("   Load factor: %.2f%%\n\n", ht_load_factor(ht));
+
+    printf("2. Adding key-value pairs:\n");
+    printf("   name -> John\n");
+    printf("   age -> 30\n");
+    printf("   occupation -> Software Engineer\n");
+    printf("   country -> USA\n\n");
 
     // Insert some key-value pairs
     ht_insert(ht, "name", "John");
@@ -17,76 +30,70 @@ int main() {
     ht_insert(ht, "occupation", "Software Engineer");
     ht_insert(ht, "country", "USA");
 
+    printf("3. After insertion:\n");
+    printf("   Size: %d items\n", ht_size(ht));
+    printf("   Load factor: %.2f%%\n\n", ht_load_factor(ht));
+
     // Search for existing keys
+    printf("4. Searching for values:\n");
     char* name = ht_search(ht, "name");
     char* age = ht_search(ht, "age");
     char* occupation = ht_search(ht, "occupation");
     char* country = ht_search(ht, "country");
 
-    // Display searched values
-    if (name) 
-        printf("Name: %s\n", name);
-    if (age) 
-        printf("Age: %s\n", age);
-    if (occupation) 
-        printf("Occupation: %s\n", occupation);
-    if (country) 
-        printf("Country: %s\n\n", country);
+    if (name) printf("   name: %s\n", name);
+    if (age) printf("   age: %s\n", age);
+    if (occupation) printf("   occupation: %s\n", occupation);
+    if (country) printf("   country: %s\n\n", country);
 
-    printf("Let's search for City, which we know was never added to the hash table:\n");
+    printf("5. Testing contains() function:\n");
+    printf("   Contains 'name': %s\n", ht_contains(ht, "name") ? "Yes" : "No");
+    printf("   Contains 'city': %s\n", ht_contains(ht, "city") ? "Yes" : "No\n");
 
-    // Search for a key that doesn't exist
-    char* city = ht_search(ht, "city");
-    if (city == NULL) {
-        printf("City: Not found in hash table\n");
-    }
+    // Test null pointer handling
+    printf("6. Testing null pointer safety:\n");
+    ht_insert(NULL, "test", "value");  // Should not crash
+    ht_search(NULL, "test");           // Should return NULL
+    ht_delete(NULL, "test");           // Should not crash
+    printf("   Null pointer tests completed safely\n\n");
 
     // Delete an existing key
-    printf("\nDeleting 'age'...\n");
+    printf("7. Deleting 'age'...\n");
     ht_delete(ht, "age");
 
-    // Try searching for the deleted key
-    age = ht_search(ht, "age");
-    if (age == NULL) {
-        printf("Age: Not found in hash table (deleted)\n\n");
-    }
+    printf("   Size after deletion: %d items\n", ht_size(ht));
+    printf("   Contains 'age': %s\n", ht_contains(ht, "age") ? "Yes" : "No\n");
 
     // Insert more items to demonstrate resizing
-    printf("Let's add more items:\n");
-    printf("City, Language, Food, Sport\n");
-    printf("New York, English, Pizza, Soccer\n");
+    printf("8. Adding more items to trigger resize:\n");
+    for (int i = 0; i < 20; i++) {
+        char key[32], value[32];
+        sprintf(key, "key%d", i);
+        sprintf(value, "value%d", i);
+        ht_insert(ht, key, value);
+    }
     
-    ht_insert(ht, "city", "New York");
-    ht_insert(ht, "language", "English");
-    ht_insert(ht, "food", "Pizza");
-    ht_insert(ht, "sport", "Soccer");
-
-    // Display newly inserted items
-    printf("\nNewly inserted items:\n");
-    char* city_after = ht_search(ht, "city");
-    char* language = ht_search(ht, "language");
-    char* food = ht_search(ht, "food");
-    char* sport = ht_search(ht, "sport");
-
-    if (city_after) 
-        printf("City: %s\n", city_after);
-    if (language) 
-        printf("Language: %s\n", language);
-    if (food) 
-        printf("Food: %s\n", food);
-    if (sport) 
-        printf("Sport: %s\n\n", sport);
+    printf("   Final size: %d items\n", ht_size(ht));
+    printf("   Final load factor: %.2f%%\n\n", ht_load_factor(ht));
 
     // Cleanup hash table
     ht_del_hash_table(ht);
 
+    printf("=== Performance Characteristics ===\n");
     printf("Time Complexity:\n");
-    printf(" - Insert: O(1) on average, O(n) in the worst case (due to collisions and resizing).\n");
-    printf(" - Lookup: O(1) on average, O(n) in the worst case (due to collisions).\n");
-    printf(" - Delete: O(1) on average, O(n) in the worst case (due to collisions).\n\n");
+    printf(" - Insert: O(1) average, O(n) worst case\n");
+    printf(" - Lookup: O(1) average, O(n) worst case\n");
+    printf(" - Delete: O(1) average, O(n) worst case\n\n");
 
-    printf("Space Complexity:\n");
-    printf(" - O(n) for storing n items in the hash table.\n");
+    printf("Space Complexity: O(n)\n\n");
+
+    printf("=== Improvements Made ===\n");
+    printf("✓ Fixed critical bug in delete function\n");
+    printf("✓ Added null pointer safety checks\n");
+    printf("✓ Improved hash function to prevent overflow\n");
+    printf("✓ Added utility functions (size, isEmpty, loadFactor, contains)\n");
+    printf("✓ Added configurable load factor constants\n");
+    printf("✓ Enhanced error handling and safety\n");
 
     return 0;
 }

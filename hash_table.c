@@ -7,6 +7,8 @@
 #define HT_INITIAL_BASE_SIZE 53
 #define HT_PRIME_1 151
 #define HT_PRIME_2 163
+#define HT_MAX_LOAD_FACTOR 70
+#define HT_MIN_LOAD_FACTOR 10
 static ht_item HT_DELETED_ITEM = {NULL, NULL};
 
 /**
@@ -86,7 +88,8 @@ static int ht_hash(const char* s, const int a, const int m) {
     long hash = 0;
     const int len_s = strlen(s);
     for (int i = 0; i < len_s; i++) {
-        hash = (hash * a + s[i]) % m;
+        // Prevent integer overflow by using modulo arithmetic
+        hash = ((hash * a) % m + s[i] % m) % m;
     }
     return (int)hash;
 }
@@ -114,8 +117,12 @@ static int ht_get_hash(const char* s, const int num_buckets, const int attempt) 
  * @param value The value for the item to be inserted.
  */
 void ht_insert(ht_hash_table* ht, const char* key, const char* value) {
+    if (ht == NULL || key == NULL || value == NULL) {
+        return;
+    }
+    
     const int load = ht->count * 100 / ht->size;
-    if (load > 70) {
+    if (load > HT_MAX_LOAD_FACTOR) {
         ht_resize_up(ht);
     }
 
@@ -147,6 +154,10 @@ void ht_insert(ht_hash_table* ht, const char* key, const char* value) {
  * @return The value associated with the key, or NULL if not found.
  */
 char* ht_search(ht_hash_table* ht, const char* key) {
+    if (ht == NULL || key == NULL) {
+        return NULL;
+    }
+    
     int index = ht_get_hash(key, ht->size, 0);
     ht_item* item = ht->items[index];
     int i = 1;
@@ -169,6 +180,10 @@ char* ht_search(ht_hash_table* ht, const char* key) {
  * @param key The key of the item to be deleted.
  */
 void ht_delete(ht_hash_table* ht, const char* key) {
+    if (ht == NULL || key == NULL) {
+        return;
+    }
+    
     int index = ht_get_hash(key, ht->size, 0);
     ht_item* item = ht->items[index];
     int i = 1;
@@ -177,17 +192,17 @@ void ht_delete(ht_hash_table* ht, const char* key) {
         if (item != &HT_DELETED_ITEM && strcmp(item->key, key) == 0) {
             ht_del_item(item);
             ht->items[index] = &HT_DELETED_ITEM;
+            ht->count--;
+
+            const int load = ht->count * 100 / ht->size;
+            if (load < HT_MIN_LOAD_FACTOR) {
+                ht_resize_down(ht);
+            }
+            return; // Fixed: return after deletion
         }
         index = ht_get_hash(key, ht->size, i);
         item = ht->items[index];
         i++;
-    }
-
-    ht->count--;
-
-    const int load = ht->count * 100 / ht->size;
-    if (load < 10) {
-        ht_resize_down(ht);
     }
 }
 
@@ -242,4 +257,50 @@ static void ht_resize_up(ht_hash_table* ht) {
 static void ht_resize_down(ht_hash_table* ht) {
     const int new_size = ht->base_size / 2;
     ht_resize(ht, new_size);
+}
+
+// Utility functions
+
+/**
+ * Returns the number of items in the hash table.
+ * 
+ * @param ht The hash table.
+ * @return The number of items.
+ */
+int ht_size(ht_hash_table* ht) {
+    return ht != NULL ? ht->count : 0;
+}
+
+/**
+ * Checks if the hash table is empty.
+ * 
+ * @param ht The hash table.
+ * @return 1 if empty, 0 otherwise.
+ */
+int ht_is_empty(ht_hash_table* ht) {
+    return ht == NULL || ht->count == 0;
+}
+
+/**
+ * Calculates the load factor of the hash table.
+ * 
+ * @param ht The hash table.
+ * @return The load factor as a percentage.
+ */
+double ht_load_factor(ht_hash_table* ht) {
+    if (ht == NULL || ht->size == 0) {
+        return 0.0;
+    }
+    return (double)ht->count / ht->size * 100.0;
+}
+
+/**
+ * Checks if a key exists in the hash table.
+ * 
+ * @param ht The hash table.
+ * @param key The key to check.
+ * @return 1 if key exists, 0 otherwise.
+ */
+int ht_contains(ht_hash_table* ht, const char* key) {
+    return ht_search(ht, key) != NULL;
 }
